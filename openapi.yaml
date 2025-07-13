@@ -1,0 +1,777 @@
+openapi: 3.0.0
+info:
+  title: Smart Analytics Platform API
+  description: API for the AI-powered website analytics platform
+  version: 1.0.0
+  
+servers:
+  - url: http://localhost:5000
+    description: Development server
+
+paths:
+  /health:
+    get:
+      summary: Get system health status
+      description: Check the health of all system components
+      tags:
+        - System
+      responses:
+        '200':
+          description: System is healthy or degraded but operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: System is unhealthy and not operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+                
+  /metrics:
+    get:
+      summary: Get system metrics
+      description: Prometheus-compatible metrics endpoint
+      tags:
+        - System
+      responses:
+        '200':
+          description: System metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+                
+  /api/events:
+    get:
+      summary: Get user events
+      description: Retrieve a list of user events
+      tags:
+        - Analytics
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of events to return
+          required: false
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: List of user events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserEvent'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a user event
+      description: Record a new user event
+      tags:
+        - Analytics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserEvent'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEvent'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/visits:
+    get:
+      summary: Get website visits
+      description: Retrieve a list of website visits
+      tags:
+        - Analytics
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of visits to return
+          required: false
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: List of website visits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WebsiteVisit'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a website visit
+      description: Record a new website visit
+      tags:
+        - Analytics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebsiteVisit'
+      responses:
+        '201':
+          description: Visit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteVisit'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/websites:
+    get:
+      summary: Get websites
+      description: Retrieve a list of websites
+      tags:
+        - Websites
+      parameters:
+        - name: userId
+          in: query
+          description: Filter by user ID
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Maximum number of websites to return
+          required: false
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: List of websites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Website'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a website
+      description: Register a new website
+      tags:
+        - Websites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebsite'
+      responses:
+        '201':
+          description: Website created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Website'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/websites/{id}:
+    get:
+      summary: Get website by ID
+      description: Retrieve details of a specific website
+      tags:
+        - Websites
+      parameters:
+        - name: id
+          in: path
+          description: Website ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Website details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Website'
+        '404':
+          description: Website not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/insights:
+    get:
+      summary: Get AI insights
+      description: Retrieve AI-generated insights
+      tags:
+        - AI Insights
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of insights to return
+          required: false
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: List of AI insights
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AIInsight'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create an AI insight
+      description: Record a new AI-generated insight
+      tags:
+        - AI Insights
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAIInsight'
+      responses:
+        '201':
+          description: Insight created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIInsight'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/recommendations:
+    get:
+      summary: Get recommendations
+      description: Retrieve AI-generated recommendations
+      tags:
+        - Recommendations
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of recommendations to return
+          required: false
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: List of recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recommendation'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a recommendation
+      description: Record a new AI-generated recommendation
+      tags:
+        - Recommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRecommendation'
+      responses:
+        '201':
+          description: Recommendation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recommendation'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - database
+        - api
+        - openai
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          description: Overall system health status
+        database:
+          type: object
+          required:
+            - connected
+          properties:
+            connected:
+              type: boolean
+              description: Whether the database is connected
+            latency:
+              type: number
+              description: Database query latency in ms
+        api:
+          type: object
+          required:
+            - healthy
+          properties:
+            healthy:
+              type: boolean
+              description: Whether the API is healthy
+        openai:
+          type: object
+          required:
+            - configured
+          properties:
+            configured:
+              type: boolean
+              description: Whether OpenAI API is configured
+        details:
+          type: object
+          description: Additional details for debugging
+        timestamp:
+          type: string
+          format: date-time
+          description: Time the health check was performed
+          
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          
+    ValidationError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                description: Validation error code
+              message:
+                type: string
+                description: Validation error message
+              path:
+                type: array
+                items:
+                  type: string
+                description: Path to the invalid field
+                
+    UserEvent:
+      type: object
+      required:
+        - id
+        - sessionId
+        - timestamp
+        - eventType
+        - url
+      properties:
+        id:
+          type: integer
+          description: Event ID
+        sessionId:
+          type: string
+          description: Session ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        eventType:
+          type: string
+          description: Type of event (pageview, click, etc.)
+        url:
+          type: string
+          description: URL where the event occurred
+        userId:
+          type: integer
+          description: User ID if authenticated
+        data:
+          type: object
+          description: Additional event data
+          
+    CreateUserEvent:
+      type: object
+      required:
+        - sessionId
+        - timestamp
+        - eventType
+        - url
+      properties:
+        sessionId:
+          type: string
+          description: Session ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        eventType:
+          type: string
+          description: Type of event (pageview, click, etc.)
+        url:
+          type: string
+          description: URL where the event occurred
+        userId:
+          type: integer
+          description: User ID if authenticated
+        data:
+          type: object
+          description: Additional event data
+          
+    WebsiteVisit:
+      type: object
+      required:
+        - id
+        - sessionId
+        - timestamp
+        - duration
+      properties:
+        id:
+          type: integer
+          description: Visit ID
+        sessionId:
+          type: string
+          description: Session ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the visit started
+        duration:
+          type: integer
+          description: Duration of the visit in seconds
+        referrer:
+          type: string
+          description: Referrer URL
+        landingPage:
+          type: string
+          description: Landing page URL
+        exitPage:
+          type: string
+          description: Exit page URL
+        userId:
+          type: integer
+          description: User ID if authenticated
+        data:
+          type: object
+          description: Additional visit data
+          
+    CreateWebsiteVisit:
+      type: object
+      required:
+        - sessionId
+        - timestamp
+      properties:
+        sessionId:
+          type: string
+          description: Session ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the visit started
+        duration:
+          type: integer
+          description: Duration of the visit in seconds
+        referrer:
+          type: string
+          description: Referrer URL
+        landingPage:
+          type: string
+          description: Landing page URL
+        exitPage:
+          type: string
+          description: Exit page URL
+        userId:
+          type: integer
+          description: User ID if authenticated
+        data:
+          type: object
+          description: Additional visit data
+          
+    Website:
+      type: object
+      required:
+        - id
+        - name
+        - url
+        - userId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          description: Website ID
+        name:
+          type: string
+          description: Website name
+        url:
+          type: string
+          description: Website URL
+        description:
+          type: string
+          description: Website description
+        type:
+          type: string
+          description: Website type (ecommerce, blog, etc.)
+        category:
+          type: string
+          description: Website category
+        userId:
+          type: integer
+          description: User ID who owns the website
+        createdAt:
+          type: string
+          format: date-time
+          description: When the website was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the website was last updated
+          
+    CreateWebsite:
+      type: object
+      required:
+        - name
+        - url
+        - userId
+      properties:
+        name:
+          type: string
+          description: Website name
+        url:
+          type: string
+          description: Website URL
+        description:
+          type: string
+          description: Website description
+        type:
+          type: string
+          description: Website type (ecommerce, blog, etc.)
+        category:
+          type: string
+          description: Website category
+        userId:
+          type: integer
+          description: User ID who owns the website
+          
+    AIInsight:
+      type: object
+      required:
+        - id
+        - timestamp
+        - insight
+        - category
+        - confidence
+        - isRead
+      properties:
+        id:
+          type: integer
+          description: Insight ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the insight was generated
+        insight:
+          type: string
+          description: The insight text
+        category:
+          type: string
+          enum: [success, warning, suggestion]
+          description: Insight category
+        confidence:
+          type: string
+          enum: [low, medium, high]
+          description: Confidence level
+        isRead:
+          type: boolean
+          description: Whether the insight has been read
+          
+    CreateAIInsight:
+      type: object
+      required:
+        - timestamp
+        - insight
+        - category
+        - confidence
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the insight was generated
+        insight:
+          type: string
+          description: The insight text
+        category:
+          type: string
+          enum: [success, warning, suggestion]
+          description: Insight category
+        confidence:
+          type: string
+          enum: [low, medium, high]
+          description: Confidence level
+        isRead:
+          type: boolean
+          default: false
+          description: Whether the insight has been read
+          
+    Recommendation:
+      type: object
+      required:
+        - id
+        - timestamp
+        - title
+        - description
+        - category
+        - implemented
+      properties:
+        id:
+          type: integer
+          description: Recommendation ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the recommendation was generated
+        title:
+          type: string
+          description: Recommendation title
+        description:
+          type: string
+          description: Detailed recommendation text
+        category:
+          type: string
+          enum: [performance, marketing, content, testing, design]
+          description: Recommendation category
+        implemented:
+          type: boolean
+          description: Whether the recommendation has been implemented
+          
+    CreateRecommendation:
+      type: object
+      required:
+        - timestamp
+        - title
+        - description
+        - category
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the recommendation was generated
+        title:
+          type: string
+          description: Recommendation title
+        description:
+          type: string
+          description: Detailed recommendation text
+        category:
+          type: string
+          enum: [performance, marketing, content, testing, design]
+          description: Recommendation category
+        implemented:
+          type: boolean
+          default: false
+          description: Whether the recommendation has been implemented
