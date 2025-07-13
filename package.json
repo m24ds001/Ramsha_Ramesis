@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "tsx server/index.ts"
+    "start": "npx tsx serve-pdf.ts"
   },
   "dependencies": {
     "@google-analytics/data": "^5.1.0",
